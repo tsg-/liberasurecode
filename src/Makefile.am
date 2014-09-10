@@ -17,7 +17,8 @@ liberasurecode_la_SOURCES = \
 		backends/null/null.c \
 		backends/xor/flat_xor_hd.c \
 		backends/jerasure/jerasure_rs_vand.c \
-		backends/jerasure/jerasure_rs_cauchy.c
+		backends/jerasure/jerasure_rs_cauchy.c \
+		backends/null_naive/null_naive.c
 
 liberasurecode_la_CPPFLAGS = -Werror @GCOV_FLAGS@
 liberasurecode_la_LIBADD = \
@@ -29,4 +30,5 @@ liberasurecode_la_LDFLAGS = -rpath '$(libdir)' -version-info 9:10:9
 MOSTLYCLEANFILES = *.gcda *.gcno *.gcov utils/chksum/*.gcda utils/chksum/*.gcno utils/chksum/*.gcov \
                    backends/null/*.gcda backends/null/*.gcno backends/null/*.gcov  \
                    backends/xor/*.gcda backends/xor/*.gcno backends/xor/*.gcov  \
-                   backends/jerasure/*.gcda backends/jerasure/*.gcno backends/jerasure/*.gcov
+                   backends/jerasure/*.gcda backends/jerasure/*.gcno backends/jerasure/*.gcov \
+                   backends/null_naive/*.gcda backends/null_naive/*.gcno backends/null_naive/*.gcov

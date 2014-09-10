@@ -47,6 +47,12 @@ int prepare_fragments_for_encode(ec_backend_t instance,
     aligned_data_len = get_aligned_data_size(instance, orig_data_size);
     *blocksize = bsize = (aligned_data_len / k);
 
+    if(instance->common.skip_preprocess==1){
+       encoded_data[0] = malloc(sizeof(char)*aligned_data_len);
+       memcpy(encoded_data[0], orig_data, orig_data_size);
+       goto out;
+    }
+
     for (i = 0; i < k; i++) {
         int payload_size = data_len > bsize ? bsize : data_len;
         char *fragment = (char *) alloc_fragment_buffer(bsize);

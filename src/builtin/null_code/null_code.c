@@ -28,6 +28,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 /* calls required for init */
 void* null_code_init(int k, int m, int hd)
@@ -44,9 +45,45 @@ int null_code_encode(void *code_desc, char **data, char **parity,
     return 0;
 }
 
+int get_fragment_size(void *code_desc, int k, int m, int orig_size)
+{
+    /* add your code here */
+    // This sample assumes non-padding fragments
+    return orig_size / k;
+}
+
+int null_code_naive_encode(void *code_desc, char *data, char **encoded,
+        int k, int m, int blocksize, int orig_size)
+{
+    /* add your code here */
+    // This sample introduces naive copy to encoded data
+    int i, payload_size, expected_size;
+    payload_size = expected_size = 0;
+
+    for(i=0; i<k; i++){
+        expected_size = payload_size + blocksize;
+        if(expected_size > orig_size) blocksize = expected_size - orig_size;
+        memcpy(encoded[i], data+payload_size, blocksize);
+        payload_size += blocksize;
+    }
+
+    for(i=k; i<k+m; i++){
+        memset(encoded[i], 0, blocksize);
+    }
+
+    return 0;
+}
+
 /* calls required for decode */
 int null_code_decode(void *code_desc, char **data, char **parity,
         int *missing_idxs, int blocksize, int decode_parity)
+{
+    /* add your code here */
+    return 0;
+}
+
+int null_code_naive_decode(void *code_desc, char **encoded, char *out,
+        int blocksize)
 {
     /* add your code here */
     return 0;

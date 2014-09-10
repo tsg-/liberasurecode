@@ -491,6 +491,7 @@ static void encode_decode_test_impl(const char *backend,
     int num_avail_frags = 0;
     char *orig_data_ptr = NULL;
     int remaining = 0;
+    ec_backend_t backend_t;
 
     desc = liberasurecode_instance_create(backend, args);
     if (-EBACKENDNOTAVAIL == desc) {
@@ -498,6 +499,8 @@ static void encode_decode_test_impl(const char *backend,
         return;
     }
     assert(desc > 0);
+
+    backend_t = liberasurecode_backend_lookup_by_name(backend);
 
     orig_data = create_buffer(orig_data_size, 'x');
     assert(orig_data != NULL);
@@ -517,7 +520,8 @@ static void encode_decode_test_impl(const char *backend,
         assert(metadata.orig_data_size == orig_data_size);
         char *data_ptr = frag + frag_header_size;
         int cmp_size = remaining >= metadata.size ? metadata.size : remaining;
-        assert(memcmp(data_ptr, orig_data_ptr, cmp_size) == 0); 
+        if (!backend_t->common.skip_preprocess)
+            assert(memcmp(data_ptr, orig_data_ptr, cmp_size) == 0);
         remaining -= cmp_size;
         orig_data_ptr += metadata.size;
     }

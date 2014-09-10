@@ -106,6 +106,7 @@ struct ec_backend_common {
     char                        soversion[MAX_LEN]; /* EC backend shared library version */
 
     struct ec_backend_op_stubs  *ops;               /* EC backend stubs */
+    unsigned int                skip_preprocess;    /* EC backend preprocess flag */
 };
 
 /* EC backend definition */
