@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2014 Eric Lambert, Tushar Gohad, Kevin Greenan
  *
  * Redistribution and use in source and binary forms, with or without
@@ -142,7 +142,7 @@ int *create_skips_array(struct ec_args *args, int skip)
     return buf;
 }
 
-static int create_frags_array(char ***array, 
+static int create_frags_array(char ***array,
                               char **data,
                               char **parity,
                               struct ec_args *args,
@@ -163,7 +163,7 @@ static int create_frags_array(char ***array,
         {
             continue;
         }
-        *ptr++ = data[i]; 
+        *ptr++ = data[i];
         num_frags++;
     }
     //add parity frags
@@ -171,7 +171,7 @@ static int create_frags_array(char ***array,
         if (parity[i] == NULL || skips[i + args->k] == 1) {
             continue;
         }
-        *ptr++ = parity[i]; 
+        *ptr++ = parity[i];
         num_frags++;
     }
 out:
@@ -635,7 +635,7 @@ static void test_fragments_needed_impl(const char *backend,
      * first parity element.  Select one of the data elements
      * as the item to reconstruct and select one not in that
      * set as the missing element.  Elements needed should
-     * be equal to the parity element, plus all other data 
+     * be equal to the parity element, plus all other data
      * elements connected to it.
      *
      * Simple example with XOR code (k=10, m=5):
@@ -661,12 +661,12 @@ static void test_fragments_needed_impl(const char *backend,
     fragments_to_reconstruct[1] = -1;
     fragments_to_exclude[0] = -1;
 
-    ret = liberasurecode_fragments_needed(desc, 
-                                          fragments_to_reconstruct, 
-                                          fragments_to_exclude, 
+    ret = liberasurecode_fragments_needed(desc,
+                                          fragments_to_reconstruct,
+                                          fragments_to_exclude,
                                           fragments_needed);
     assert(ret > -1);
-    
+
     // "Reconstruct" the first data in the parity equation
     fragments_to_reconstruct[0] = fragments_needed[0];
     fragments_to_reconstruct[1] = -1;
@@ -691,12 +691,12 @@ static void test_fragments_needed_impl(const char *backend,
 
     assert(fragments_to_exclude[0] > -1);
 
-    ret = liberasurecode_fragments_needed(desc, 
-                                          fragments_to_reconstruct, 
-                                          fragments_to_exclude, 
+    ret = liberasurecode_fragments_needed(desc,
+                                          fragments_to_reconstruct,
+                                          fragments_to_exclude,
                                           new_fragments_needed);
     assert(ret > -1);
-   
+
     // Verify that new_fragments_needed contains the
     // first parity element and all data elements connected
     // to that parity element sans the data to reconstruct.

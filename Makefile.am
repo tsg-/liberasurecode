@@ -52,4 +52,4 @@ cscope:
 	find src include -name "*.[ch]" > cscope.files
 	cscope -q -b
 
-MOSTLYCLEANFILES = *.gcda *.gcno *.gcov 
+MOSTLYCLEANFILES = *.gcda *.gcno *.gcov
