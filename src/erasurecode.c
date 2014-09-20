@@ -42,7 +42,6 @@ extern struct ec_backend_common backend_null;
 extern struct ec_backend_common backend_flat_xor_hd;
 extern struct ec_backend_common backend_jerasure_rs_vand;
 extern struct ec_backend_common backend_jerasure_rs_cauchy;
-extern struct ec_backend_common backend_null_naive;
 
 static const char *ec_chksum_types[CHKSUM_TYPES_MAX] = {
     "none",
@@ -55,7 +54,6 @@ ec_backend_t ec_backends_supported[] = {
     (ec_backend_t) &backend_jerasure_rs_vand,
     (ec_backend_t) &backend_jerasure_rs_cauchy,
     (ec_backend_t) &backend_flat_xor_hd,
-    (ec_backend_t) &backend_null_naive,
     NULL,
 };
 
