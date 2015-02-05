@@ -670,15 +670,20 @@ static void reconstruct_test_impl(const ec_backend_id_t be_id,
             continue;
         }
         char *cmp = NULL;
+        fragment_header_t *cmp_hdr, *out_hdr;
         if (i < args->k) {
             cmp = encoded_data[i];
         }
         else {
             cmp = encoded_parity[i - args->k];
         }
+        cmp_hdr = (fragment_header_t *)cmp;
         memset(out, 0, encoded_fragment_len);
         rc = liberasurecode_reconstruct_fragment(desc, avail_frags, num_avail_frags, encoded_fragment_len, i, out);
         assert(rc == 0);
+
+        out_hdr = (fragment_header_t *)out;
+        assert(cmp_hdr->meta.chksum_type == out_hdr->meta.chksum_type);
         assert(memcmp(out, cmp, encoded_fragment_len) == 0);
     }
     free(orig_data);
