@@ -26,6 +26,7 @@
  * vi: set noai tw=79 ts=4 sw=4:
  */
 
+#include "assert.h"
 #include "list.h"
 #include "erasurecode.h"
 #include "erasurecode_backend.h"
@@ -563,8 +564,20 @@ int liberasurecode_decode(int desc,
     m = instance->args.uargs.m;
 
     if (num_fragments < k) {
+        log_error("Not enough fragments to decode, got %d, need %d!",
+                  num_fragments, k);
         ret = -EINSUFFFRAGS;
         goto out;
+    }
+
+    for (i = 0; i < num_fragments; ++i) {
+        /* Verify metadata checksum */
+        if (is_invalid_fragment_header(
+                (fragment_header_t *) available_fragments[i])) {
+            log_error("Invalid fragment header information!");
+            ret = -EBADHEADER;
+            goto out;
+        }
     }
 
     if (instance->common.id != EC_BACKEND_SHSS) {
@@ -767,6 +780,16 @@ int liberasurecode_reconstruct_fragment(int desc,
 
     k = instance->args.uargs.k;
     m = instance->args.uargs.m;
+
+    for (i = 0; i < num_fragments; i++) {
+        /* Verify metadata checksum */
+        if (is_invalid_fragment_header(
+                (fragment_header_t *) available_fragments[i])) {
+            log_error("Invalid fragment header information!");
+            ret = -EBADHEADER;
+            goto out;
+        }
+    }
 
     /*
      * Allocate arrays for data, parity and missing_idxs
@@ -989,6 +1012,14 @@ int liberasurecode_get_fragment_metadata(char *fragment,
         goto out;
     }
 
+    /* Verify metadata checksum */
+    if (is_invalid_fragment_header(
+            (fragment_header_t *) fragment)) {
+        log_error("Invalid fragment header information!");
+        ret = -EBADHEADER;
+        goto out;
+    }
+
     memcpy(fragment_metadata, fragment, sizeof(struct fragment_metadata));
     fragment_hdr = (fragment_header_t *) fragment;
     if (LIBERASURECODE_FRAG_HEADER_MAGIC != fragment_hdr->magic) {
@@ -1022,11 +1053,32 @@ out:
     return ret;
 }
 
+#if LIBERASURECODE_VERSION >= _VERSION(1,2,0)
+int is_invalid_fragment_header(fragment_header_t *header)
+{
+    uint32_t *stored_csum = NULL, csum = 0;
+    assert (NULL != header);
+    stored_csum = get_metadata_chksum((char *) header);
+    if (NULL == stored_csum)
+        return 0; /* can't verify, crc32 call error */
+    csum = crc32(0, &header->meta, sizeof(fragment_metadata_t));
+    return (*stored_csum != csum);
+}
+#else
+int is_invalid_fragment_header(fragment_header_t *header)
+{
+    return 0;
+}
+#endif
+
 int liberasurecode_verify_fragment_metadata(ec_backend_t be,
                                             fragment_metadata_t *md)
 {
     int k = be->args.uargs.k;
     int m = be->args.uargs.m;
+    fragment_header_t *header = (fragment_header_t *) md;
+    if (is_invalid_fragment_header(header))
+        return 1;
     if (md->idx < 0 || (md->idx > (k + m))) {
         return 1;
     }
@@ -1068,11 +1120,11 @@ int is_invalid_fragment(int desc, char *fragment)
     return 0;
 }
 
-int is_valid_fragment_metadata(int desc, fragment_metadata_t *fragment_metadata)
+int is_invalid_fragment_metadata(int desc, fragment_metadata_t *fragment_metadata)
 {
     ec_backend_t be = liberasurecode_backend_instance_get_by_desc(desc);
     if (!be) {
-        log_error("Unable to verify stripe metadata: invalid backend id %d.",
+        log_error("Unable to verify fragment metadata: invalid backend id %d.",
                 desc);
         return -EINVALIDPARAMS;
     }
@@ -1105,7 +1157,7 @@ int liberasurecode_verify_stripe_metadata(int desc,
 
     for (i = 0; i < num_fragments; i++) {
         fragment_metadata_t *fragment_metadata = (fragment_metadata_t*)fragments[i];
-        int ret = is_valid_fragment_metadata(desc, fragment_metadata);
+        int ret = is_invalid_fragment_metadata(desc, fragment_metadata);
         if (ret < 0) {
             return ret;
         }
